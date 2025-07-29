@@ -3,13 +3,13 @@ import styles from './home.module.css'
 import { BsSearch } from 'react-icons/bs'
 import { Link, useNavigate } from 'react-router-dom'
 
-interface CoinProps {
+export interface CoinProps {
   id: string;
   name: string;
   symbol: string;
   priceUsd: string;
   vwap24Hr: string;
-  changePercent24hr: string;
+  changePercent24Hr: string;
   supply: string;
   maxSupply: string;
   rank: string;
@@ -29,15 +29,17 @@ export function Home() {
 
   const [input, setInput] = useState("");
   const [coins, setCoins] = useState<CoinProps[]>([]);
+  const [offset, setOffset] = useState(0);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     getData();
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offset])
 
   async function getData() {
-    fetch("https://rest.coincap.io/v3/assets?limit=10&offset=0&apiKey=4356c9f00ffc8c96a864da9c7cc139408f6bd7ed4238fba88a4bad1eac155c43")
+    fetch(`https://rest.coincap.io/v3/assets?limit=10&offset=${offset}&apiKey=4356c9f00ffc8c96a864da9c7cc139408f6bd7ed4238fba88a4bad1eac155c43`)
       .then(response => response.json())
       .then((data: DataProp) => {
         const coinsData = data.data;
@@ -65,7 +67,9 @@ export function Home() {
         })
 
         //console.log(formatedResult);
-        setCoins(formatedResult);
+
+        const listCoins = [...coins, ...formatedResult]
+        setCoins(listCoins);
 
       })
   }
@@ -79,7 +83,13 @@ export function Home() {
   }
 
   function handleGetMore() {
-    alert('Deu certo')
+    if(offset === 0){
+      setOffset(10)
+      return;
+    }
+
+    setOffset(offset + 10)
+
   }
 
   return (
@@ -116,6 +126,7 @@ export function Home() {
 
             <td className={styles.tdlabel} data-label='Moeda'>
                 <div className={styles.name}>
+                  <img className={styles.logo} src={`https://assets.coincap.io/assets/icons/${item.symbol.toLowerCase()}@2x.png`} alt="Logo cripto" />
                   <Link to={`/detail/${item.id}`}>
                     <span>{item.name}</span> | {item.symbol}
                   </Link>
@@ -127,15 +138,15 @@ export function Home() {
               </td>
 
               <td className={styles.tdlabel} data-label='Preço'>
-                8.000
+                {item.formatedPrice}
               </td>
 
               <td className={styles.tdlabel} data-label='Volume'>
-                2B
+                {item.formatedVolume}
               </td>
 
-              <td className={styles.tdProfict} data-label='Mudança 24h'>
-                <span>1.20</span>
+              <td className={Number(item.changePercent24Hr) > 0 ? styles.tdProfict : styles.tdLoss} data-label='Mudança 24h'>
+                <span>{Number(item.changePercent24Hr).toFixed(4)}</span>
               </td>
             </tr>
           ))}

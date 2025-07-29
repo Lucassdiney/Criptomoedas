@@ -83,9 +83,32 @@ table th, table td{
     font-weight: bold;
 }
 
+.logo{
+    width: 20px;
+    height: 20px;
+    transition: all 1s;
+}
+
+.logo:hover{
+    transform: scale(1.5);
+    z-index: 99;
+}
+
+.name{
+    display: flex;
+    gap:8px;
+    align-items: center;
+}
+
 /*Responsividade Tabela*/
 
 @media  screen and (max-width: 600px){
+    
+    .name img{
+        margin-left: 14px;
+    }
+    
+    
     table{
         border: 0;
     }
